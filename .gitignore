@@ -1,0 +1,23 @@
+# Python environment
+__pycache__/
+*.py[cod]
+*$py.class
+.venv
+venv/
+ENV/
+
+# Data Handling
+# We ignore the raw TSVs because they are too large for GitHub
+data/*.tsv
+data/*.csv
+data/*.zip
+
+# WE ALLOW PARQUET (The Cache)
+!data/*.parquet
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel

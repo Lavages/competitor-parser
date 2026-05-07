@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competitors Compass • Afterglow Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.cubing.net/v0/css/@cubing/icons/css">
+    <style>
+        :root {
+            --afterglow-red: #e60012;
+            --afterglow-gold: #ffcc00;
+            --afterglow-black: #0f0f0f;
+            --afterglow-dark: #1a1a1a;
+            --afterglow-gray: #333333;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--afterglow-black);
+            background-image:
+                linear-gradient(rgba(15, 15, 15, 0.8), rgba(15, 15, 15, 0.8)),
+                url("https://www.transparenttextures.com/patterns/stardust.png");
+            color: #eeeeee;
+        }
+
+        /* Afterglow Red Stripe Header Effect */
+        .header-bg {
+            background: linear-gradient(110deg, var(--afterglow-red) 15%, transparent 15.5%);
+        }
+
+        .nav-active {
+            color: var(--afterglow-red) !important;
+            border-bottom: 4px solid var(--afterglow-red);
+            padding-bottom: 4px;
+        }
+
+        .brand-logo {
+            font-weight: 900;
+            font-size: 2.8rem;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            font-style: italic;
+            text-shadow: 3px 3px 0px var(--afterglow-red);
+        }
+
+        .brand-tag {
+            background-color: white;
+            color: black;
+            padding: 2px 12px;
+            margin-left: 6px;
+            transform: skewX(-15deg);
+            display: inline-block;
+            font-style: normal;
+        }
+
+        /* Selection Buttons - Rock Style */
+        .event-btn {
+            border: 2px solid var(--afterglow-gray);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .event-btn:hover {
+            border-color: var(--afterglow-red);
+            transform: translateY(-2px);
+        }
+
+        .event-btn.active {
+            background-color: var(--afterglow-red) !important;
+            color: white !important;
+            border-color: var(--afterglow-gold) !important;
+            box-shadow: 4px 4px 0px var(--afterglow-gold);
+            transform: scale(1.1) rotate(-2deg);
+        }
+
+        .find-btn {
+            background: var(--afterglow-red);
+            color: white;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+            transition: all 0.2s;
+        }
+
+        .find-btn:hover {
+            background: white;
+            color: var(--afterglow-red);
+            transform: scale(1.05);
+        }
+
+        /* Results Table */
+        .wca-table-header {
+            background-color: var(--afterglow-red);
+            color: white;
+            transform: skewX(-5deg);
+        }
+
+        .results-container {
+            background-color: rgba(26, 26, 26, 0.9);
+            border: 2px solid var(--afterglow-gray);
+            box-shadow: 10px 10px 0px rgba(230, 0, 18, 0.2);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--afterglow-red);
+            border-radius: 0;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-2 sm:p-4 flex flex-col items-center">
+    <nav
+        class="w-full max-w-5xl mx-auto bg-[#1b1b1b] p-4 flex justify-center items-center gap-10 sticky top-0 z-50 border-b-2 border-red-600 backdrop-blur-md">
+        <a href="/" class="text-sm font-black nav-active uppercase tracking-tighter">Competitors</a>
+        <a href="/specialist"
+            class="text-sm text-gray-400 hover:text-red-500 font-black uppercase tracking-tighter transition-all">Specialist</a>
+    </nav>
+
+    <main class="max-w-5xl w-full mx-auto p-4 sm:p-10 space-y-12">
+        <header class="text-center relative">
+            <h1 class="brand-logo text-white">Competitors<span class="brand-tag">Compass</span></h1>
+            <p class="text-gold-500 text-xs font-black uppercase tracking-[0.3em] mt-2"
+                style="color: var(--afterglow-gold)">Same as always • Always the same</p>
+        </header>
+
+        <div class="bg-[#151515] p-8 rounded-none border-l-8 border-red-600 space-y-8 shadow-xl">
+            <div id="event-selector" class="flex flex-wrap justify-center gap-4"></div>
+            <div class="flex justify-center">
+                <button id="find-btn" class="find-btn py-4 px-16 text-xl active:scale-95">
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <div id="loading-spinner" class="hidden flex flex-col justify-center items-center py-10 gap-4">
+            <div class="animate-spin h-12 w-12 border-4 border-red-600 border-t-transparent rounded-full"></div>
+            <span class="font-black text-red-500 uppercase italic">Tuning Instruments...</span>
+        </div>
+
+        <div id="results-container"
+            class="results-container overflow-hidden min-h-[100px] flex flex-col items-center justify-center">
+            <p id="no-data-message" class="text-gray-500 font-black uppercase p-8 hidden italic">No fans found in the
+                crowd.</p>
+        </div>
+    </main>
+
+    <footer
+        class="w-full max-w-5xl mx-auto text-center text-gray-600 text-xs mt-8 pb-8 font-bold border-t border-gray-800 pt-4">
+        <p>Wiigii's WCA Tools x <span style="color: var(--afterglow-red)">Afterglow</span> • 2026</p>
+    </footer>
+
+    <script>
+        const EVENT_ICONS = {
+            "333": "event-333", "222": "event-222", "444": "event-444", "555": "event-555",
+            "666": "event-666", "777": "event-777", "333oh": "event-333oh", "333bf": "event-333bf",
+            "333fm": "event-333fm", "clock": "event-clock", "minx": "event-minx", "pyram": "event-pyram",
+            "skewb": "event-skewb", "sq1": "event-sq1", "444bf": "event-444bf", "555bf": "event-555bf",
+            "333mbf": "event-333mbf"
+        };
+
+        let selectedEvents = [];
+        const eventSelector = document.getElementById("event-selector");
+        Object.entries(EVENT_ICONS).forEach(([id, iconClass]) => {
+            const btn = document.createElement("button");
+            btn.className = "event-btn bg-[#1b1b1b] p-3 transition-all";
+            btn.innerHTML = `<span class="cubing-icon ${iconClass} text-2xl"></span>`;
+            btn.addEventListener("click", () => {
+                btn.classList.toggle("active");
+                selectedEvents = selectedEvents.includes(id) ? selectedEvents.filter(e => e !== id) : [...selectedEvents, id];
+            });
+            eventSelector.appendChild(btn);
+        });
+
+        document.getElementById("find-btn").addEventListener("click", async () => {
+            const container = document.getElementById("results-container");
+            if (selectedEvents.length === 0) return;
+            document.getElementById("loading-spinner").classList.remove("hidden");
+            document.getElementById("no-data-message").classList.add("hidden");
+            container.querySelectorAll(".results-data").forEach(el => el.remove());
+
+            try {
+                const res = await fetch(`/api/competitors?events=${selectedEvents.join(",")}`);
+                const competitors = await res.json();
+                if (!competitors.length) { document.getElementById("no-data-message").classList.remove("hidden"); return; }
+
+                const html = `
+                    <div class="w-full results-data animate-in fade-in duration-500">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-red-600 text-white">
+                                    <th class="p-4 text-xs font-black uppercase italic">Member</th>
+                                    <th class="p-4 text-xs font-black uppercase italic">WCA ID</th>
+                                    <th class="p-4 text-xs font-black uppercase italic">Origin</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800">
+                                ${competitors.map(c => `
+                                    <tr class="hover:bg-red-900/20 transition-colors">
+                                        <td class="p-4 font-black text-white uppercase tracking-tighter">${c.personName}</td>
+                                        <td class="p-4"><a href="https://worldcubeassociation.org/persons/${c.personId}" target="_blank" class="text-gold-400 font-bold hover:underline" style="color: var(--afterglow-gold)">${c.personId}</a></td>
+                                        <td class="p-4 text-gray-400 font-bold">${c.personCountryId}</td>
+                                    </tr>
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </div>`;
+                container.insertAdjacentHTML("beforeend", html);
+            } finally { document.getElementById("loading-spinner").classList.add("hidden"); }
+        });
+    </script>
+</body>
+
+</html>
