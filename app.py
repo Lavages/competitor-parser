@@ -144,7 +144,8 @@ def api_spec():
             if len(matches) >= 100: break
             
     return jsonify(matches)
-
+CACHE_COMP = os.path.join("data", "competitors.parquet")
+CACHE_SPEC = os.path.join("data", "specialists.parquet")
 # --- Startup ---
 if __name__ == "__main__":
     # Start loading in background so the server starts immediately
