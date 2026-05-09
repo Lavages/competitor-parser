@@ -79,7 +79,6 @@
             transform: scale(1.05);
         }
 
-        /* Specialist Counter Badge */
         .event-wrapper {
             position: relative;
             display: inline-block;
@@ -116,6 +115,8 @@
         <a href="/"
             class="text-sm text-gray-400 hover:text-yellow-500 font-black uppercase tracking-tighter transition-all">Competitors</a>
         <a href="/specialist" class="text-sm font-black nav-active uppercase tracking-tighter">Specialist</a>
+        <a href="/competitions"
+            class="text-sm text-gray-400 hover:text-yellow-500 font-black uppercase tracking-tighter transition-all">Competitions</a>
     </nav>
 
     <main class="max-w-5xl w-full mx-auto p-4 sm:p-10 space-y-12">
@@ -174,13 +175,11 @@
         });
 
         function renderPodiums(podiums) {
-            return podiums.map(p => {
-                return `
-                    <div class="event-wrapper">
-                        <span class="cubing-icon event-${p.eventId} text-2xl text-red-500"></span>
-                        <span class="counter-badge">${p.count}</span>
-                    </div>`;
-            }).join("");
+            return podiums.map(p => `
+                <div class="event-wrapper">
+                    <span class="cubing-icon event-${p.eventId} text-2xl text-red-500"></span>
+                    <span class="counter-badge">${p.count}</span>
+                </div>`).join("");
         }
 
         document.getElementById("find-btn").addEventListener("click", async () => {
@@ -200,6 +199,7 @@
                         <table class="w-full text-left">
                             <thead class="bg-yellow-500 text-black">
                                 <tr>
+                                    <th class="p-4 text-xs font-black uppercase italic">WCA ID</th>
                                     <th class="p-4 text-xs font-black uppercase italic">Specialist</th>
                                     <th class="p-4 text-xs font-black uppercase italic">Region</th>
                                     <th class="p-4 text-xs font-black uppercase italic">Podium Count</th>
@@ -208,6 +208,7 @@
                             <tbody class="divide-y divide-gray-800">
                                 ${specialists.map(s => `
                                     <tr class="hover:bg-yellow-500/10 transition-colors">
+                                        <td class="p-4 font-mono text-yellow-500 font-bold">${s.personId}</td>
                                         <td class="p-4 font-black text-white uppercase italic">${s.personName}</td>
                                         <td class="p-4 text-gray-400 font-bold">${s.personCountryId}</td>
                                         <td class="p-4"><div class="flex gap-4 flex-wrap">${renderPodiums(s.podiums)}</div></td>

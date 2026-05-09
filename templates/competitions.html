@@ -4,306 +4,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Afterglow Explorer • Wiigii's WCA</title>
-
+    <title>Competition Finder • Afterglow Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Permanent+Marker&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.cubing.net/v0/css/@cubing/icons/css">
-
     <style>
         :root {
             --afterglow-red: #e60012;
-            --afterglow-dark: #121212;
-            --afterglow-accent: #2a2a2a;
+            --afterglow-pink: #ff007f;
+            --afterglow-black: #0f0f0f;
+            --afterglow-dark: #1a1a1a;
+            --afterglow-gray: #333333;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #080808;
-            background-image: radial-gradient(circle at 50% 50%, #1a0505 0%, #080808 100%);
-        }
-
-        .afterglow-title {
-            font-family: 'Permanent Marker', cursive;
-            color: var(--afterglow-red);
-            text-shadow: 3px 3px 0px #000, 0 0 10px rgba(230, 0, 18, 0.4);
+            background-color: var(--afterglow-black);
+            background-image:
+                linear-gradient(rgba(15, 15, 15, 0.9), rgba(15, 15, 15, 0.9)),
+                url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+            color: #eeeeee;
         }
 
         .nav-active {
-            color: var(--afterglow-red) !important;
-            border-bottom: 3px solid var(--afterglow-red);
-            text-shadow: 0 0 8px rgba(230, 0, 18, 0.6);
+            color: var(--afterglow-pink) !important;
+            border-bottom: 4px solid var(--afterglow-pink);
+            padding-bottom: 4px;
         }
 
-        /* Punk-style tags */
-        .brand-tag {
-            background-color: var(--afterglow-red);
+        .brand-logo {
+            font-weight: 900;
+            font-size: 2.8rem;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            font-style: italic;
             color: white;
-            padding: 2px 10px;
-            transform: rotate(-2deg);
+            text-shadow: 3px 3px 0px var(--afterglow-pink);
+        }
+
+        .brand-tag {
+            background-color: var(--afterglow-pink);
+            color: black;
+            padding: 2px 12px;
+            margin-left: 6px;
+            transform: skewX(-15deg);
             display: inline-block;
-            box-shadow: 3px 3px 0px #000;
+            font-style: normal;
         }
 
-        .event-icon {
-            font-size: 2rem;
-            vertical-align: middle;
-            display: inline-block;
-            margin-right: 4px;
-            transition: transform 0.2s;
+        .event-btn {
+            border: 2px solid var(--afterglow-gray);
+            transition: all 0.2s;
         }
 
-        .event-btn-active {
-            border-color: var(--afterglow-red) !important;
-            background-color: rgba(230, 0, 18, 0.15) !important;
-            box-shadow: 0 0 15px rgba(230, 0, 18, 0.3), inset 0 0 10px rgba(230, 0, 18, 0.1);
-            transform: translateY(-2px);
+        .event-btn.active {
+            background-color: var(--afterglow-pink) !important;
+            color: black !important;
+            border-color: white !important;
+            transform: scale(1.1) rotate(2deg);
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
         }
 
-        /* Custom scrollbar for that Afterglow red */
-        ::-webkit-scrollbar {
-            width: 6px;
+        .find-btn {
+            background: linear-gradient(90deg, var(--afterglow-red), #900000);
+            color: white;
+            font-weight: 900;
+            text-transform: uppercase;
+            clip-path: polygon(0% 15%, 95% 0%, 100% 85%, 5% 100%);
+            transition: all 0.2s;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #000;
+        .results-card {
+            background-color: #1a1a1a;
+            border-right: 6px solid var(--afterglow-pink);
+        }
+
+        /* Toggle Switch Logic */
+        .toggle-dot {
+            transition: all 0.3s ease-in-out;
+        }
+
+        input:checked~.toggle-dot {
+            transform: translateX(100%);
+            background-color: var(--afterglow-pink);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--afterglow-red);
-            border-radius: 3px;
-        }
-
-        .scrollable-events {
-            max-width: 300px;
-            overflow-x: auto;
-            white-space: nowrap;
-            padding: 10px 0;
-            scrollbar-width: thin;
-        }
-
-        .glass-panel {
-            background: rgba(20, 20, 20, 0.95);
-            border: 1px solid #222;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        #match-mode-toggle:checked+.block+.dot {
-            transform: translateX(1.5rem);
-            background-color: var(--afterglow-red);
-        }
-
-        .comp-link:hover {
-            color: var(--afterglow-red);
-            text-decoration: underline wavy;
+            background: var(--afterglow-pink);
         }
     </style>
 </head>
 
-<body class="min-h-screen text-gray-100 p-2 sm:p-4 flex flex-col items-center">
-
+<body class="min-h-screen p-2 sm:p-4 flex flex-col items-center">
     <nav
-        class="w-full max-w-5xl mx-auto glass-panel rounded-t-2xl p-3 sm:p-4 flex flex-wrap justify-center items-center gap-3 sm:gap-6 sticky top-0 z-50 border-b border-red-900/30">
+        class="w-full max-w-5xl mx-auto bg-[#1b1b1b] p-4 flex justify-center items-center gap-10 sticky top-0 z-50 border-b-2 border-[#ff007f] backdrop-blur-md">
         <a href="/"
-            class="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Rankings</a>
+            class="text-sm text-gray-400 hover:text-[#ff007f] font-black uppercase tracking-tighter transition-all">Competitors</a>
         <a href="/specialist"
-            class="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Specialists</a>
-        <a href="/competitions" class="text-xs font-black nav-active uppercase tracking-widest">Competitions</a>
+            class="text-sm text-gray-400 hover:text-[#ff007f] font-black uppercase tracking-tighter transition-all">Specialist</a>
+        <a href="/competitions" class="text-sm font-black nav-active uppercase tracking-tighter">Competitions</a>
     </nav>
 
-    <main
-        class="max-w-5xl w-full mx-auto glass-panel rounded-b-2xl p-4 sm:p-10 space-y-10 border-x border-b border-red-900/20">
-
+    <main class="max-w-5xl w-full mx-auto p-4 sm:p-10 space-y-12">
         <header class="text-center">
-            <h1 class="afterglow-title text-5xl sm:text-7xl mb-4">
-                SAME <span class="brand-tag">AS ALWAYS</span>
-            </h1>
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-[0.4em] italic">Afterglow Competition Explorer
+            <h1 class="brand-logo">Tourney<span class="brand-tag">Pulse</span></h1>
+            <p class="text-pink-500 text-xs font-black uppercase tracking-[0.3em] mt-2 italic">Chasing the pink horizon
             </p>
         </header>
 
-        <!-- Event Selection -->
-        <div class="space-y-6">
-            <h3 class="text-center text-[10px] font-black uppercase tracking-[0.3em] text-red-600/60">Target Event
-                Combos</h3>
-            <div id="event-selector" class="flex flex-wrap justify-center gap-3"></div>
-        </div>
+        <div class="bg-[#151515] p-8 rounded-none border-r-8 border-[#ff007f] space-y-8 shadow-xl">
+            <div id="event-selector" class="flex flex-wrap justify-center gap-4"></div>
 
-        <!-- Controls -->
-        <div
-            class="flex flex-col items-center gap-8 bg-[#0f0f0f] p-8 rounded-2xl border border-red-900/10 shadow-inner">
-            <label for="match-mode-toggle" class="flex items-center cursor-pointer group">
-                <div class="relative">
-                    <input type="checkbox" id="match-mode-toggle" class="sr-only">
-                    <div class="block bg-black w-14 h-8 rounded-full border border-gray-800"></div>
-                    <div class="dot absolute left-1 top-1 bg-gray-700 w-6 h-6 rounded-full transition transform"></div>
+            <div class="flex flex-col items-center gap-4">
+                <!-- Toggle Switch -->
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-black uppercase italic text-gray-400">Exact Match</span>
+                    <label for="partial-toggle" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" id="partial-toggle" class="sr-only" checked>
+                            <div class="block bg-gray-800 w-10 h-6 rounded-full"></div>
+                            <div class="toggle-dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition">
+                            </div>
+                        </div>
+                    </label>
+                    <span class="text-xs font-black uppercase italic text-pink-500">Inclusive</span>
                 </div>
-                <div class="ml-4">
-                    <span id="match-mode-label"
-                        class="font-black text-xs uppercase tracking-widest text-gray-500 select-none group-hover:text-red-500 transition-colors">
-                        Inclusive Match (Default)
-                    </span>
-                </div>
-            </label>
 
-            <button id="find-btn"
-                class="w-full sm:w-auto bg-red-700 hover:bg-red-600 active:scale-95 text-white font-black py-4 px-16 rounded-sm shadow-[4px_4px_0px_#000] border-2 border-black transition-all uppercase tracking-tighter text-xl">
-                SEARCH DATA
-            </button>
-        </div>
-
-        <!-- Loading / Results -->
-        <div id="loading-spinner" class="hidden flex flex-col items-center py-10 gap-4">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-red-600 border-r-transparent"></div>
-            <p class="text-red-600 font-black uppercase tracking-widest text-[10px] animate-pulse">Synchronizing with
-                WCA Database...</p>
-        </div>
-
-        <div id="results-container" class="min-h-[100px] flex flex-col items-center">
-            <p id="error-message"
-                class="text-red-500 font-black uppercase text-xs tracking-widest hidden p-6 text-center bg-red-950/20 rounded-xl border border-red-900/50 w-full">
-            </p>
-            <div id="no-data-message"
-                class="hidden text-center py-20 bg-black rounded-3xl border border-dashed border-red-900/20 w-full">
-                <p class="text-gray-600 font-black uppercase tracking-widest text-sm">No sessions found for this combo.
-                </p>
+                <button id="find-btn" class="find-btn py-4 px-16 text-xl active:scale-95">
+                    Scan Events
+                </button>
             </div>
+        </div>
+
+        <div id="loading-spinner" class="hidden flex flex-col justify-center items-center py-10 gap-4">
+            <div class="animate-ping h-8 w-8 bg-pink-600 rounded-full shadow-lg"></div>
+            <span class="font-black text-pink-500 uppercase italic">Syncing with Registry...</span>
+        </div>
+
+        <div id="results-container"
+            class="results-card overflow-hidden min-h-[100px] flex flex-col items-center justify-center">
+            <p id="no-data-message" class="text-gray-500 font-black uppercase p-8 hidden italic">No venues found in this
+                frequency.</p>
         </div>
     </main>
 
     <footer
-        class="w-full max-w-5xl mx-auto text-center text-gray-700 text-[10px] mt-8 pb-8 font-black uppercase tracking-[0.5em]">
-        <p>© 2026 Wiigii's WCA • Afterglow Edition</p>
+        class="w-full max-w-5xl mx-auto text-center text-gray-600 text-xs mt-8 pb-8 font-bold border-t border-gray-800 pt-4">
+        <p>Wiigii's WCA Tools x <span style="color: var(--afterglow-pink)">Afterglow</span> • 2026</p>
     </footer>
 
     <script>
         const EVENT_ICONS = {
-            "333": '<span class="cubing-icon event-333 event-icon"></span>',
-            "222": '<span class="cubing-icon event-222 event-icon"></span>',
-            "444": '<span class="cubing-icon event-444 event-icon"></span>',
-            "555": '<span class="cubing-icon event-555 event-icon"></span>',
-            "666": '<span class="cubing-icon event-666 event-icon"></span>',
-            "777": '<span class="cubing-icon event-777 event-icon"></span>',
-            "333oh": '<span class="cubing-icon event-333oh event-icon"></span>',
-            "333bf": '<span class="cubing-icon event-333bf event-icon"></span>',
-            "333fm": '<span class="cubing-icon event-333fm event-icon"></span>',
-            "clock": '<span class="cubing-icon event-clock event-icon"></span>',
-            "minx": '<span class="cubing-icon event-minx event-icon"></span>',
-            "pyram": '<span class="cubing-icon event-pyram event-icon"></span>',
-            "skewb": '<span class="cubing-icon event-skewb event-icon"></span>',
-            "sq1": '<span class="cubing-icon event-sq1 event-icon"></span>',
-            "444bf": '<span class="cubing-icon event-444bf event-icon"></span>',
-            "555bf": '<span class="cubing-icon event-555bf event-icon"></span>',
-            "333mbf": '<span class="cubing-icon event-333mbf event-icon"></span>'
+            "333": "event-333", "222": "event-222", "444": "event-444", "555": "event-555",
+            "666": "event-666", "777": "event-777", "333oh": "event-333oh", "333bf": "event-333bf",
+            "333fm": "event-333fm", "clock": "event-clock", "minx": "event-minx", "pyram": "event-pyram",
+            "skewb": "event-skewb", "sq1": "event-sq1", "444bf": "event-444bf", "555bf": "event-555bf",
+            "333mbf": "event-333mbf"
         };
 
         let selectedEvents = [];
         const eventSelector = document.getElementById("event-selector");
-        const findBtn = document.getElementById("find-btn");
-        const matchModeToggle = document.getElementById("match-mode-toggle");
-        const matchModeLabel = document.getElementById("match-mode-label");
-        const resultsContainer = document.getElementById("results-container");
-        const spinner = document.getElementById("loading-spinner");
-        const errorMsg = document.getElementById("error-message");
-        const noData = document.getElementById("no-data-message");
 
-        // UI Initialization
-        Object.entries(EVENT_ICONS).forEach(([id, icon]) => {
+        Object.entries(EVENT_ICONS).forEach(([id, iconClass]) => {
             const btn = document.createElement("button");
-            btn.className = "bg-[#111] hover:border-red-900 text-gray-400 rounded-lg p-3 border border-gray-800 transition-all active:scale-90 flex items-center justify-center";
-            btn.innerHTML = icon;
-            btn.onclick = () => {
-                btn.classList.toggle("event-btn-active");
-                btn.classList.toggle("text-white");
-                selectedEvents.includes(id) ? selectedEvents = selectedEvents.filter(e => e !== id) : selectedEvents.push(id);
-            };
+            btn.className = "event-btn bg-[#1b1b1b] p-3 transition-all";
+            btn.innerHTML = `<span class="cubing-icon ${iconClass} text-2xl"></span>`;
+            btn.addEventListener("click", () => {
+                btn.classList.toggle("active");
+                selectedEvents = selectedEvents.includes(id) ? selectedEvents.filter(e => e !== id) : [...selectedEvents, id];
+            });
             eventSelector.appendChild(btn);
         });
 
-        matchModeToggle.onchange = () => {
-            matchModeLabel.textContent = matchModeToggle.checked ? "Exact Match Mode" : "Inclusive Match Mode";
-            matchModeLabel.classList.toggle("text-red-500", matchModeToggle.checked);
-        };
+        document.getElementById("find-btn").addEventListener("click", async () => {
+            const container = document.getElementById("results-container");
+            const isPartial = document.getElementById("partial-toggle").checked;
 
-        const formatDate = (c) => {
-            if (!c.date || !c.date.from) return "TBA";
-            const start = new Date(c.date.from);
-            return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
-        };
-
-        findBtn.onclick = async () => {
-            if (selectedEvents.length === 0) {
-                errorMsg.textContent = "SELECT AT LEAST ONE EVENT.";
-                errorMsg.classList.remove("hidden");
-                return;
-            }
-
-            spinner.classList.remove("hidden");
-            errorMsg.classList.add("hidden");
-            noData.classList.add("hidden");
-            resultsContainer.querySelectorAll(".dynamic-result").forEach(el => el.remove());
-
-            const partial = matchModeToggle.checked ? 'false' : 'true';
+            document.getElementById("loading-spinner").classList.remove("hidden");
+            document.getElementById("no-data-message").classList.add("hidden");
+            container.querySelectorAll(".results-data").forEach(el => el.remove());
 
             try {
-                const res = await fetch(`/competitions?events=${selectedEvents.join(",")}&partial=${partial}`);
-                const data = await res.json();
+                // Exact switch handled by the boolean 'partial' query param
+                const url = `/competitions?events=${selectedEvents.join(",")}&partial=${isPartial}`;
+                const res = await fetch(url);
+                const comps = await res.json();
 
-                if (data.length === 0) {
-                    noData.classList.remove("hidden");
+                if (!comps.length) {
+                    document.getElementById("no-data-message").classList.remove("hidden");
                     return;
                 }
 
                 const html = `
-                    <div class="w-full dynamic-result mt-6">
-                        <div class="hidden md:block overflow-hidden rounded-xl border border-red-900/20 bg-black">
-                            <table class="w-full text-left">
-                                <thead class="bg-[#151515] border-b border-red-900/30">
-                                    <tr>
-                                        <th class="px-6 py-4 text-[10px] font-black text-red-600 uppercase tracking-widest">Competition</th>
-                                        <th class="px-6 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Location</th>
-                                        <th class="px-6 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Date</th>
-                                        <th class="px-6 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Events</th>
+                    <div class="w-full results-data">
+                        <table class="w-full text-left">
+                            <thead class="bg-[#ff007f] text-black">
+                                <tr>
+                                    <th class="p-4 text-xs font-black uppercase italic">Date</th>
+                                    <th class="p-4 text-xs font-black uppercase italic">Competition</th>
+                                    <th class="p-4 text-xs font-black uppercase italic">Location</th>
+                                    <th class="p-4 text-xs font-black uppercase italic">Events</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800">
+                                ${comps.map(c => `
+                                    <tr class="hover:bg-pink-500/10 transition-colors">
+                                        <td class="p-4 font-bold text-pink-500 text-xs">${c.date.from}</td>
+                                        <td class="p-4 font-black text-white uppercase italic">
+                                            <a href="https://www.worldcubeassociation.org/competitions/${c.id}" target="_blank" class="hover:underline">${c.name}</a>
+                                        </td>
+                                        <td class="p-4 text-gray-400 text-xs font-bold">${c.city}, ${c.country}</td>
+                                        <td class="p-4">
+                                            <div class="flex gap-2 flex-wrap">
+                                                ${c.events.map(e => `<span class="cubing-icon event-${e} text-lg text-gray-500"></span>`).join("")}
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody class="divide-y divide-[#111]">
-                                    ${data.map(c => `
-                                        <tr class="hover:bg-red-950/10 transition-colors">
-                                            <td class="px-6 py-5">
-                                                <a href="https://www.worldcubeassociation.org/competitions/${c.id}" target="_blank" class="font-black text-gray-200 comp-link uppercase tracking-tighter">${c.name}</a>
-                                            </td>
-                                            <td class="px-6 py-5 text-xs font-bold text-gray-500 uppercase">${c.city}, ${c.country}</td>
-                                            <td class="px-6 py-5 text-xs font-bold text-red-700/80">${formatDate(c)}</td>
-                                            <td class="px-6 py-5">
-                                                <div class="scrollable-events">${c.events.map(e => EVENT_ICONS[e] || '').join("")}</div>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- Mobile View -->
-                        <div class="md:hidden space-y-4">
-                            ${data.map(c => `
-                                <div class="bg-black border border-red-900/20 rounded-xl p-6">
-                                    <a href="https://www.worldcubeassociation.org/competitions/${c.id}" target="_blank" class="text-lg font-black text-red-600 uppercase tracking-tighter block mb-2">${c.name}</a>
-                                    <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">📍 ${c.city}, ${c.country} • 📅 ${formatDate(c)}</p>
-                                    <div class="flex flex-wrap gap-1 border-t border-[#111] pt-4">${c.events.map(e => EVENT_ICONS[e] || '').join("")}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                resultsContainer.insertAdjacentHTML("beforeend", html);
-            } catch (e) {
-                errorMsg.textContent = "DATABASE OFFLINE.";
-                errorMsg.classList.remove("hidden");
-            } finally {
-                spinner.classList.add("hidden");
-            }
-        };
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </div>`;
+                container.insertAdjacentHTML("beforeend", html);
+            } catch (err) {
+                console.error("Fetch error:", err);
+            } finally { document.getElementById("loading-spinner").classList.add("hidden"); }
+        });
     </script>
 </body>
 
