@@ -38,69 +38,61 @@ def load_data():
     global DF_COMPETITORS, DF_SPECIALISTS, DF_COMPETITIONS, IS_LOADED
     
     with DATA_LOCK:
-        # 1. Try loading all from Parquet Cache
-        if os.path.exists(CACHE_COMP) and os.path.exists(CACHE_SPEC) and os.path.exists(CACHE_COMPS):
-            try:
-                print("📦 Loading all data from Parquet cache...", file=sys.stderr)
-                DF_COMPETITORS = pd.read_parquet(CACHE_COMP)
-                DF_SPECIALISTS = pd.read_parquet(CACHE_SPEC)
-                DF_COMPETITIONS = pd.read_parquet(CACHE_COMPS)
-                IS_LOADED = True
-                print("✅ All data loaded successfully from Parquet.", file=sys.stderr)
-                return
-            except Exception as e:
-                print(f"⚠️ Parquet Load Error: {e}", file=sys.stderr)
-
-        # 2. Fallback: Process TSVs
-        print("📂 Cache incomplete. Processing raw TSVs...", file=sys.stderr)
+        print("📦 Initializing data synchronization...", file=sys.stderr)
         try:
-            os.makedirs(DATA_DIR, exist_ok=True)
-
-            # --- Process Competitors & Specialists (Original Logic) ---
-            p_df = pd.read_csv(TSV_PERSONS, sep='\t', dtype={'wca_id': str, 'sub_id': int})
-            p_df = p_df[p_df['sub_id'] == 1][['wca_id', 'name', 'country_id']]
-            
-            rs = pd.read_csv(TSV_RANKS_S, sep='\t', low_memory=False)
-            ra = pd.read_csv(TSV_RANKS_A, sep='\t', low_memory=False)
-            ranks = pd.concat([rs, ra])[['person_id', 'event_id']].drop_duplicates()
-            
-            comp_final = ranks.groupby('person_id')['event_id'].apply(list).reset_index()
-            comp_final = comp_final.merge(p_df, left_on='person_id', right_on='wca_id')
-            
-            res_df = pd.read_csv(TSV_RESULTS, sep='\t', low_memory=False)
-            podiums = res_df[(res_df['round_type_id'].isin(['f', 'c'])) & (res_df['pos'] <= 3) & (res_df['best'] > 0) & (~res_df['event_id'].isin(REMOVED_EVENTS))]
-            
-            spec_counts = podiums.groupby(['person_id', 'event_id']).size().reset_index(name='count')
-            spec_final = spec_counts.merge(p_df, left_on='person_id', right_on='wca_id')
-
-            # --- Process Competitions (Parquet logic) ---
-            if os.path.exists(TSV_COMPETITIONS):
+            # 1. LOAD COMPETITIONS
+            if os.path.exists(CACHE_COMPS):
+                DF_COMPETITIONS = pd.read_parquet(CACHE_COMPS)
+                print("✅ Loaded Competitions from Parquet.", file=sys.stderr)
+            elif os.path.exists(TSV_COMPETITIONS):
                 print("⚙️ Generating Competitions Parquet...", file=sys.stderr)
                 c_df = pd.read_csv(TSV_COMPETITIONS, sep='\t')
                 c_df = c_df[c_df['cancelled'] != 1]
-                
-                # Logic from competitions.py
                 c_df['events'] = c_df['event_specs'].str.split(' ').apply(lambda x: [e for e in x if e and e.lower() != "fto"])
                 c_df['date_from'] = c_df.apply(lambda r: f"{r['year']}-{int(r['month']):02d}-{int(r['day']):02d}", axis=1)
                 c_df['date_till'] = c_df.apply(lambda r: f"{r['end_year']}-{int(r['end_month']):02d}-{int(r['end_day']):02d}", axis=1)
-                
-                # Keep relevant columns
                 DF_COMPETITIONS = c_df[['id', 'name', 'city_name', 'country_id', 'events', 'date_from', 'date_till']]
                 DF_COMPETITIONS.to_parquet(CACHE_COMPS)
+            
+            # 2. LOAD COMPETITORS
+            if os.path.exists(CACHE_COMP):
+                DF_COMPETITORS = pd.read_parquet(CACHE_COMP)
+                print("✅ Loaded Competitors from Parquet.", file=sys.stderr)
+            elif os.path.exists(TSV_PERSONS) and os.path.exists(TSV_RANKS_S):
+                print("⚙️ Generating Competitors Parquet...", file=sys.stderr)
+                p_df = pd.read_csv(TSV_PERSONS, sep='\t', dtype={'wca_id': str, 'sub_id': int})
+                p_df = p_df[p_df['sub_id'] == 1][['wca_id', 'name', 'country_id']]
+                rs = pd.read_csv(TSV_RANKS_S, sep='\t', low_memory=False)
+                ra = pd.read_csv(TSV_RANKS_A, sep='\t', low_memory=False)
+                ranks = pd.concat([rs, ra])[['person_id', 'event_id']].drop_duplicates()
+                DF_COMPETITORS = ranks.groupby('person_id')['event_id'].apply(list).reset_index()
+                DF_COMPETITORS = DF_COMPETITORS.merge(p_df, left_on='person_id', right_on='wca_id')
+                DF_COMPETITORS.to_parquet(CACHE_COMP)
 
-            # Save the others
-            comp_final.to_parquet(CACHE_COMP)
-            spec_final.to_parquet(CACHE_SPEC)
-            
-            DF_COMPETITORS = comp_final
-            DF_SPECIALISTS = spec_final
-            IS_LOADED = True
-            print("✅ New Parquet cache saved for all files.", file=sys.stderr)
-            
+            # 3. LOAD SPECIALISTS
+            if os.path.exists(CACHE_SPEC):
+                DF_SPECIALISTS = pd.read_parquet(CACHE_SPEC)
+                print("✅ Loaded Specialists from Parquet.", file=sys.stderr)
+            elif os.path.exists(TSV_RESULTS):
+                print("⚙️ Generating Specialists Parquet...", file=sys.stderr)
+                # Re-using p_df logic if not already loaded in this scope
+                p_df = pd.read_csv(TSV_PERSONS, sep='\t', dtype={'wca_id': str, 'sub_id': int})
+                p_df = p_df[p_df['sub_id'] == 1][['wca_id', 'name', 'country_id']]
+                res_df = pd.read_csv(TSV_RESULTS, sep='\t', low_memory=False)
+                podiums = res_df[(res_df['round_type_id'].isin(['f', 'c'])) & (res_df['pos'] <= 3) & (res_df['best'] > 0) & (~res_df['event_id'].isin(REMOVED_EVENTS))]
+                spec_counts = podiums.groupby(['person_id', 'event_id']).size().reset_index(name='count')
+                DF_SPECIALISTS = spec_counts.merge(p_df, left_on='person_id', right_on='wca_id')
+                DF_SPECIALISTS.to_parquet(CACHE_SPEC)
+
+            # Final Check
+            if DF_COMPETITORS is not None and DF_SPECIALISTS is not None and DF_COMPETITIONS is not None:
+                IS_LOADED = True
+                print("🚀 All data systems online.", file=sys.stderr)
+            else:
+                print("⚠️ Some dataframes failed to load. Check for missing Parquet/TSV files.", file=sys.stderr)
+
         except Exception as e:
-            print(f"❌ Error during TSV processing: {e}", file=sys.stderr)
-
-# --- Competition Routes ---
+            print(f"❌ Critical Load Error: {e}", file=sys.stderr)
 
 @competitions_bp.route("/competitions")
 def get_competitions_api():
